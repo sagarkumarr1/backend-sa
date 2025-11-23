@@ -1,51 +1,62 @@
-import uploadRoutes from "./routes/uploadRoutes.js";
-import userRoutes from "./routes/userRoutes.js";
-import postRoutes from "./routes/postRoutes.js";
 import express from "express";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import cors from "cors";
 import morgan from "morgan";
+
+// ROUTES
 import authRoutes from "./routes/authRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
+import postRoutes from "./routes/postRoutes.js";
+import uploadRoutes from "./routes/uploadRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
+
+import { v2 as cloudinary } from "cloudinary";
 
 dotenv.config();
 const app = express();
 
-// ---------- IMPORTANT FOR RENDER DEPLOYMENT ----------
-app.use(cors({
-  origin: "*", // Yaha tum apna frontend URL bhi laga sakte ho
-  methods: "GET,POST,PUT,DELETE",
-  allowedHeaders: "Content-Type,Authorization"
-}));
-// ------------------------------------------------------
+/* -------------------------------
+   CLOUDINARY CONFIG
+-------------------------------- */
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
-app.use(express.json());
+/* -------------------------------
+   MIDDLEWARE
+-------------------------------- */
+app.use(express.json({ limit: "10mb" }));
+app.use(cors());
 app.use(morgan("dev"));
 
+/* -------------------------------
+   ROUTES
+-------------------------------- */
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/ai", aiRoutes);
 
-// ---------- HEALTH CHECK FOR RENDER ----------
-app.get("/health", (req, res) => {
-  res.status(200).send("OK");
-});
-// --------------------------------------------
-
-// Default route
+// Health check
 app.get("/", (req, res) => {
-  res.send("API is running...");
+  res.send("Backend is running… 🚀");
 });
 
+/* -------------------------------
+   DATABASE + SERVER START
+-------------------------------- */
 const PORT = process.env.PORT || 5000;
 
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
-    console.log("MongoDB Connected");
-    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+    console.log("✅ MongoDB Connected");
+    app.listen(PORT, () =>
+      console.log(`🚀 Server running on port ${PORT}`)
+    );
   })
-  .catch((err) => console.log(err));
+  .catch((err) => console.error("❌ DB Error:", err));
