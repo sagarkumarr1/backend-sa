@@ -6,23 +6,36 @@ import dotenv from "dotenv";
 import mongoose from "mongoose";
 import cors from "cors";
 import morgan from "morgan";
-import authRoutes from "./routes/authRoutes.js"; // add this
+import authRoutes from "./routes/authRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
 
 dotenv.config();
 const app = express();
 
+// ---------- IMPORTANT FOR RENDER DEPLOYMENT ----------
+app.use(cors({
+  origin: "*", // Yaha tum apna frontend URL bhi laga sakte ho
+  methods: "GET,POST,PUT,DELETE",
+  allowedHeaders: "Content-Type,Authorization"
+}));
+// ------------------------------------------------------
+
 app.use(express.json());
-app.use(cors());
 app.use(morgan("dev"));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/upload", uploadRoutes);
-
 app.use("/api/ai", aiRoutes);
 
+// ---------- HEALTH CHECK FOR RENDER ----------
+app.get("/health", (req, res) => {
+  res.status(200).send("OK");
+});
+// --------------------------------------------
+
+// Default route
 app.get("/", (req, res) => {
   res.send("API is running...");
 });
