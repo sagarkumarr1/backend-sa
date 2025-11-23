@@ -42,8 +42,8 @@ app.use("/api/upload", uploadRoutes);
 app.use("/api/ai", aiRoutes);
 
 // Health check
-app.get("/", (req, res) => {
-  res.send("Backend is running… 🚀");
+app.get("/healthz", (req, res) => {
+  res.status(200).send("OK");
 });
 
 /* -------------------------------
